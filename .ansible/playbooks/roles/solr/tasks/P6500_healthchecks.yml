@@ -1,0 +1,9 @@
+# Check reverse proxy is listening
+- block:
+  - uri:
+      url: "http://{{cops_solr_vars.query_host}}:{{cops_solr_vars.env.SOLR_HTTP_PORT}}"
+      return_content: true
+    register: cops_solr_check
+    until: "'solr' in cops_solr_check.content"
+    retries: 25
+    delay: 1 

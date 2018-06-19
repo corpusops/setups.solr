@@ -1,0 +1,27 @@
+---
+# install custom config files
+- include_role: {name: corpusops.roles/configs, private: true}
+  vars: {cops_configs_templates: "{{cops_solr_vars.configs}}"}
+  tags: [cops_solr_s_setup_configs]
+  when: [cops_solr_s_setup_configs]
+
+- tags: [cops_solr_s_setup_files]
+  when: [cops_solr_s_setup_files]
+  block:
+  - name: files
+    template:
+      dest: "{{cops_solr_vars.instance_root}}/{{item.dest}}"
+      src: "{{item.src|default(item.dest)}}"
+      force: "{{item.get('force', true)}}"
+      mode:  "{{item.get('mode', '0644')}}"
+      owner: "{{item.get('owner', cops_solr_vars.user)}}"
+      group: "{{item.get('group', cops_solr_vars.group)}}"
+      trim_blocks: false
+    with_items:
+    - "{{cops_solr_vars.extra_configs}}"
+    tags: [cops_solr_s_setup_files]
+
+- tags: [cops_solr_s_setup_reverse_proxy]
+  when: [cops_solr_s_setup_reverse_proxy]
+  include_tasks: _setup_reverse_proxy.yml
+

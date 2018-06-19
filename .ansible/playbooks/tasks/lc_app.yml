@@ -1,0 +1,4 @@
+---
+# compute app settings
+- include_role: {name: ./roles/solr}
+  become: "{{cops_solr_vars.become}}"

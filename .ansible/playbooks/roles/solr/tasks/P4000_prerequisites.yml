@@ -1,0 +1,93 @@
+---
+- when: [cops_solr_s_prerequisites_pkgs]
+  tags: [cops_solr_s_prerequisites_pkgs]
+  block:
+  - name: update & install prerequisites
+    package:
+      cache_valid_time: '{{60*60}}'
+      update_cache: yes
+      name: '{{item}}'
+      state: present
+    when: "(ansible_os_family.lower() in ['debian'] and
+            cops_solr_vars.deb_packages is not none and
+            cops_solr_vars.deb_packages|length > 0)"
+    with_items: "{{cops_solr_vars.deb_packages}}"
+  - name: update & install prerequisites
+    package:
+      update_cache: yes
+      enablerepo: epel,epel-testing
+      name: '{{item}}'
+      state: present
+    when: "(ansible_os_family.lower() in ['redhat'] and
+            cops_solr_vars.rh_packages is not none and
+            cops_solr_vars.rh_packages|length > 0)"
+    with_items: "{{cops_solr_vars.rh_packages}}"
+
+# Install a jdk (oracle)
+- tags: [cops_solr_s_prerequisites_jdk]
+  when: [cops_solr_s_prerequisites_jdk]
+  block:
+  - include_role: {name: "corpusops.roles/localsettings_jdk"}
+
+# get solr archive sha checksum
+- when: [cops_solr_s_prerequisites_archive_solr]
+  tags: [cops_solr_s_prerequisites_archive_solr]
+  block:
+  - stat: {path: "{{cops_solr_sha1file}}"}
+    register: cops_solr_sha1test
+  - name: get archive - SHA CRC
+    get_url:
+      url: "{{cops_solr_sha1_url}}"
+      dest: "{{cops_solr_sha1file}}"
+    become: yes
+    become_user: "{{cops_solr_vars.user}}"
+    when: "(cops_solr_vars.sha1_verify and
+            not cops_solr_sha1test.stat.exists)"
+  - shell: "cat {{cops_solr_sha1file}}"
+    register: app_sha1v
+    when: ["(cops_solr_vars.sha1_verify)"]
+
+# Download, unpack, link solr release tarball
+- include_role: {name: corpusops.roles/install_archive}
+  become: yes
+  become_user: "{{cops_solr_vars.user}}"
+  vars:
+    _archive:
+      filetest: "{{cops_solr_vars.filetest}}"
+      archive: "{{cops_solr_vars.tb}}"
+      app_path: "{{cops_solr_vars.real_root}}"
+      urls:
+        archive: "{{cops_solr_url}}"
+        archive_crc: "{{app_sha1v.stdout.strip()}}"
+        verify_sha1: "{{cops_solr_vars.sha1_verify}}"
+  tags: [cops_solr_s_prerequisites_solr]
+  when: [cops_solr_s_prerequisites_solr]
+
+# Configure nginx itself
+- include_role: {name: "corpusops.roles/services_http_nginx"}
+  tags: [cops_solr_s_prerequisistes_reverse_proxy_install]
+  when: [cops_solr_s_prerequisistes_reverse_proxy_install]
+
+- name: make instance layout
+  shell: |-
+      set -ex
+      cd "{{cops_solr_vars.real_root}}"
+      d="{{cops_solr_vars.instance_root}}"
+      sd="{{cops_solr_vars.instance_server_root}}"
+      for i in "$d" "$sd";do if [ ! -e "$i" ];then mkdir -pv "$i";fi;done
+      for i in $(find . -maxdepth 1 -mindepth 1);do
+        if ! ( echo $i | egrep -q "./({{cops_solr_vars.notlinked.root|join('|')}})$");then
+          ln -svf "$(pwd)/$i"  "$d/"
+        fi
+      done
+      cd server
+      for i in $(find . -maxdepth 1 -mindepth 1);do
+        if ! ( echo $i | egrep -q "./({{cops_solr_vars.notlinked.server|join('|')}})$");then
+          ln -svf "$(pwd)/$i"  "$sd/"
+        fi
+      done
+  become: true
+  become_user: "{{cops_solr_vars.user}}"
+  tags: [cops_solr_s_prerequisites_solr_layout]
+  when: [cops_solr_s_prerequisites_solr_layout]
+  changed_when: false

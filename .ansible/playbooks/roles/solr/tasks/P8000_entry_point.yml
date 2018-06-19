@@ -1,0 +1,12 @@
+---
+- include_role: {name: corpusops.roles/configs, private: true}
+  vars:
+    cops_configs_templates: "{{cops_solr_ep_configs}}"
+    cops_configs_notify: "{{cops_solr_vars.rhandlers}}"
+# this will fail on non systemd hosts on purpose !
+# if we have activated the reconfigure units (docker mode essentially)
+- cops_service:
+    enabled: "{{cops_solr_vars.activated | ternary(True, False)}}"
+    daemon_reload: yes
+    name: "{{item}}"
+  with_items: "{{cops_solr_vars.reconfigure_services}}"

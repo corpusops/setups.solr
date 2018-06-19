@@ -1,0 +1,50 @@
+---
+# this sysctl should be set on the host
+# sudo sysctl -w vm.max_map_count=262144
+version: '3.5'
+networks: {solr_net: {ipam: {config: [{subnet: "172.19.124.0/24"}], driver: default}, driver: bridge}}
+# Build with:
+#  docker build --squash -t corpusops/solr -f Dockerfile [--build-arg=SKIP_COPS_UPDATE=y]
+# Start with:
+#  docker-compose -f d*-compose.yml up -t 0 -d --force-recreate solr
+x-image: &image_template
+  image: "corpusops/solr:5.4.0"
+  # image: "corpusops/solr:2.3.3"
+  environment:
+  - "DOCKER_SKIP_START=${DOCKER_SKIP_START-}"
+  - |
+    A_RECONFIGURE=---
+    ---
+    only_steps: true
+    cops_solr_lifecycle_app_push_code: false
+    cops_solr_s_docker_reconfigure: true
+    cops_solr_s_first_fixperms: true
+    cops_solr_s_setup: true
+    # cops_solr_has_reverse_proxy: false
+    cops_solr_http_users:
+    - {user: admin,  password: "password4yZ8e4Ef8K824Sk"}
+  - |
+    A_POSTCONFIGURE=---
+    ---
+    only_steps: true
+    cops_solr_lifecycle_app_push_code: false
+    cops_solr_s_manage_content: true
+    # cops_solr_has_reverse_proxy: false
+  command: >
+    sh -c 'if [ "x$DOCKER_SKIP_START" != x ];
+    then while true;do echo sleeping;sleep 65535;done
+    else exec /app_entry_point;
+    fi'
+  # for now this is a bloat image-as-a-vm to make a dev env ligther than a vagrant VM
+  tmpfs: [/run, /run/lock]
+  volumes: &image_volumes
+  # systemd
+  - "/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  # data
+  - "./local/setup:/setup"
+  - "./local/data/solr:/srv/projects/solr/data"
+  # Remember: /setup/rootfs/ is synced inside the container /
+  networks: {solr_net: {ipv4_address: "172.19.124.3"}}
+services:
+  solr:
+    <<:  [ *image_template ]

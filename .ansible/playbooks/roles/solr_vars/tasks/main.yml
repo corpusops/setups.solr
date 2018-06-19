@@ -1,0 +1,6 @@
+---
+- tags: [cops_solr, solr]
+  block:
+  - include_tasks: A0000_vars.yml
+    tags: ["cops_solr_s_vars"]
+    when: ["cops_solr_s_vars|default(true)"]

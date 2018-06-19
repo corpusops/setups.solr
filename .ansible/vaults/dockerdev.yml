@@ -1,0 +1,6 @@
+---
+solr_servers: all
+cops_solr_force_push_code: true
+#
+cops_solr_s_manage_content: false
+cops_solr_project_sdir: "solr" 

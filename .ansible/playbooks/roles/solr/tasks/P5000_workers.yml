@@ -1,0 +1,26 @@
+---
+- when: ["cops_solr_s_workers_service"]
+  tags: ["cops_solr_s_workers_service"]
+  become: true
+  block:
+  # activate the main app service
+  - cops_service:
+      state: "{{cops_solr_vars.activated | ternary('started', 'stopped')}}"
+      enabled: "{{cops_solr_vars.activated | ternary(True, False)}}"
+      name: "{{item}}"
+    with_items: "{{cops_solr_vars.services}}"
+  # force a reload/restart here
+  - shell: echo "force service reload/restart"
+    notify: "{{cops_solr_vars.rhandlers}}"
+  - meta: flush_handlers
+
+# force reload
+- name: Reload nginx
+  include_role:
+    name: "corpusops.roles/nginx_control"
+    allow_duplicates: true
+  vars:
+    _corpusops_nginx_control:
+      state: "{{cops_solr_vars.services_nginx_reload_state}}"
+  tags: [cops_solr_s_workers_reverse_proxy_reload]
+  when: [cops_solr_s_workers_reverse_proxy_reload]
