@@ -193,6 +193,9 @@ cops_solr_files_default:
   - {path: "{{vars['cops_solr_instance_server_root']}}",
      owner: "{{vars['cops_solr_user']}}", group: "{{vars['cops_solr_group']}}",
      state: directory, mode: "{{vars['cops_solr_stickymode']}}755"}
+  - {path: "{{vars['cops_solr_instance_server_root']}}/configsets",
+     owner: "{{vars['cops_solr_user']}}", group: "{{vars['cops_solr_group']}}",
+     state: directory, mode: "{{vars['cops_solr_stickymode']}}755"}
   - {path: "{{vars['cops_solr_instance_server_root']}}/etc",
      owner: "{{vars['cops_solr_user']}}", group: "{{vars['cops_solr_group']}}",
      state: directory, mode: "{{vars['cops_solr_stickymode']}}755"}
