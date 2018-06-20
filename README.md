@@ -45,23 +45,11 @@ Mostly for solr5+
     EOF
     ```
 
-- to disable the nginx vhost:
+- to enable/disable the nginx vhost:
 
     ```
     # cops_solr_has_reverse_proxy: false
     ```
-
-#### Initialise user data volumes
-- You need to preseed some volumes from your image before running it
-    - data
-
-        ```sh
-        mkdir -p local/data
-        docker run --rm  -v $PWD/local/data:/ldata --entrypoint rsync \
-            corpusops/solr:5.4.0 \
-            "/srv/projects/solr/data/" "/ldata/" \
-            -av --delete --exclude "pwd_*" --delete-excluded
-        ```
 
 ### Run this image through docker
 - To pull & run this image
