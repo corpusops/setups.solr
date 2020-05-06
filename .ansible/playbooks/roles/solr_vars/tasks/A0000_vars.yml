@@ -16,7 +16,7 @@
 - name: "solr secrets -- {{solrsecret}}}"
   include_tasks: _set_secret_variable.yml
   loop_control: {loop_var: solrsecret}
-  with_items: "{{cops_solr_vars.secret_variables}}"
+  loop: "{{cops_solr_vars.secret_variables}}"
   tags: [solr, vars, solr_vars]
   no_log: "{{not (cops_vars_debug|default(false))}}"
 

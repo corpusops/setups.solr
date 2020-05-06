@@ -11,7 +11,7 @@
     when: "(ansible_os_family.lower() in ['debian'] and
             cops_solr_vars.deb_packages is not none and
             cops_solr_vars.deb_packages|length > 0)"
-    with_items: "{{cops_solr_vars.deb_packages}}"
+    loop: "{{cops_solr_vars.deb_packages}}"
   - name: update & install prerequisites
     package:
       update_cache: yes
@@ -21,7 +21,7 @@
     when: "(ansible_os_family.lower() in ['redhat'] and
             cops_solr_vars.rh_packages is not none and
             cops_solr_vars.rh_packages|length > 0)"
-    with_items: "{{cops_solr_vars.rh_packages}}"
+    loop: "{{cops_solr_vars.rh_packages}}"
 
 # Install a jdk (oracle)
 - tags: [cops_solr_s_prerequisites_jdk]

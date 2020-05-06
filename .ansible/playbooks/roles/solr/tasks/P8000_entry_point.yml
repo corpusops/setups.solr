@@ -9,4 +9,4 @@
     enabled: "{{cops_solr_vars.activated | ternary(True, False)}}"
     daemon_reload: yes
     name: "{{item}}"
-  with_items: "{{cops_solr_vars.reconfigure_services}}"
+  loop: "{{cops_solr_vars.reconfigure_services}}"

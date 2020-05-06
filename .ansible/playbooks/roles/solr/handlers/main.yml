@@ -5,7 +5,7 @@
     daemon_reload: yes
     state: restarted
     name: "{{item}}"
-  with_items: "{{cops_solr_vars.services}}"
+  loop: "{{cops_solr_vars.services}}"
   tags: [cops_solr_handlers, cops_solr_handlers_restart]
   when: "(cops_solr_vars.activated and
           corpusops_vars.has_services_manager and
@@ -15,7 +15,7 @@
   cops_service:
     state: restarted
     name: "{{item}}"
-  with_items: "{{cops_solr_vars.services}}"
+  loop: "{{cops_solr_vars.services}}"
   tags: [cops_solr_handlers, cops_solr_handlers_restart]
   when: "(cops_solr_vars.activated and
           corpusops_vars.has_services_manager and
@@ -26,7 +26,7 @@
     daemon_reload: yes
     state: reloaded
     name: "{{item}}"
-  with_items: "{{cops_solr_vars.services}}"
+  loop: "{{cops_solr_vars.services}}"
   tags: [cops_solr_handlers, cops_solr_handlers_reload]
   when: "(cops_solr_vars.activated and
           corpusops_vars.has_services_manager and
@@ -36,7 +36,7 @@
   cops_service:
     state: reloaded
     name: "{{item}}"
-  with_items: "{{cops_solr_vars.services}}"
+  loop: "{{cops_solr_vars.services}}"
   tags: [cops_solr_handlers, cops_solr_handlers_reload]
   when: "(cops_solr_vars.activated and
           corpusops_vars.has_services_manager and

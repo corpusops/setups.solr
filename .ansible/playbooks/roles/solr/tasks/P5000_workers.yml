@@ -8,7 +8,7 @@
       state: "{{cops_solr_vars.activated | ternary('started', 'stopped')}}"
       enabled: "{{cops_solr_vars.activated | ternary(True, False)}}"
       name: "{{item}}"
-    with_items: "{{cops_solr_vars.services}}"
+    loop: "{{cops_solr_vars.services}}"
   # force a reload/restart here
   - shell: echo "force service reload/restart"
     notify: "{{cops_solr_vars.rhandlers}}"

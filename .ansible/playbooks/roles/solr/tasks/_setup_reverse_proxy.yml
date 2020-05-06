@@ -27,7 +27,7 @@
     name: "{{item.user}}"
     password: "{{item.password}}"
     state: present
-  with_items: "{{cops_solr_vars.http_users}}"
+  loop: "{{cops_solr_vars.http_users}}"
   when: ["cops_solr_s_setup_reverse_proxy_users and (
             cops_solr_vars.http_users is not none and
             cops_solr_vars.http_users|length > 0)"]
